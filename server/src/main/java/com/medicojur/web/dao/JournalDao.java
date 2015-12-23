@@ -3,11 +3,7 @@ package com.medicojur.web.dao;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * User: Renato
- */
-
-public class StuffDao implements Dao<String> {
+public class JournalDao implements Dao<String> {
 	@Override
 	public List<? extends String> getAll() {
 		return Arrays.asList( "Stuff", "Something else", "Whatever" );
