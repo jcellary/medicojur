@@ -1,26 +1,23 @@
-package com.medicojur.web.model.service;
+package com.medicojur.web.model.server;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class Account {
+@AllArgsConstructor
+public class RegisterPublisher {
 
-  public enum Role {
-    Publisher,
-    Subscriber
+  public RegisterPublisher() {
   }
 
   @JsonProperty
-  private String userId;
-
-  @JsonProperty
-  private Role role;
-
-  @JsonProperty
   private String userName;
+
+  @JsonProperty
+  private String password;
 
   @JsonProperty
   private String firstName;

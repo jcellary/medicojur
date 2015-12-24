@@ -1,0 +1,54 @@
+package com.medicojur.web.integration;
+
+import com.google.inject.servlet.GuiceFilter;
+import com.medicojur.web.MainContextListener;
+import com.medicojur.web.model.hibernate.Contact;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.service.ServiceRegistry;
+
+public class Utils {
+
+  public static SessionFactory getSessionFactory() throws HibernateException {
+
+    ServiceRegistry serviceRegistry =
+        new StandardServiceRegistryBuilder().configure().build();
+
+    return new MetadataSources(serviceRegistry).buildMetadata().buildSessionFactory();
+  }
+
+  public static void clearDb(SessionFactory sessionFactory) {
+    Session session = sessionFactory.openSession();
+    Transaction tx = session.beginTransaction();
+
+    Query q = session.createQuery("delete from Contact");
+    q.executeUpdate();
+
+    tx.commit();
+  }
+
+  public static Server createJettyServer(int port) throws Exception {
+    MainContextListener contextListener = new MainContextListener();
+
+    Server server = new Server(port);
+
+    ServletContextHandler servletContextHandler = new ServletContextHandler();
+    servletContextHandler.addEventListener(contextListener);
+    server.setHandler(servletContextHandler);
+
+    servletContextHandler.addFilter(GuiceFilter.class, "/*", null);
+    servletContextHandler.addServlet(DefaultServlet.class, "/");
+    server.start();
+
+    return server;
+  }
+
+}
