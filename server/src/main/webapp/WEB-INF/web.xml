@@ -11,7 +11,7 @@
 	</description>
 
 	<listener>
-		<listener-class>com.medicojur.web.Main</listener-class>
+		<listener-class>com.medicojur.web.MainContextListener</listener-class>
 	</listener>
 
 	<filter>
