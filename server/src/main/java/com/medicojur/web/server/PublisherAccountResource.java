@@ -1,5 +1,7 @@
 package com.medicojur.web.server;
 
+import com.medicojur.web.model.server.Authenticate;
+import com.medicojur.web.model.server.AuthenticationToken;
 import com.medicojur.web.model.server.RegisterPublisher;
 import com.medicojur.web.model.service.Account;
 import com.medicojur.web.service.AccountService;
@@ -8,11 +10,11 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("publisherAccount")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -27,6 +29,7 @@ public class PublisherAccountResource {
   }
 
   @POST
+  @Path("register")
   public void register(RegisterPublisher registerPublisher) {
 
     accountService.registerPublisher(
@@ -40,20 +43,20 @@ public class PublisherAccountResource {
         registerPublisher.getPassword());
   }
 
-  @GET
-  public String getAll() {
-    System.out.println("Requested to get All");
+  @POST
+  @Path("authenticate")
+  public Response authenticate(Authenticate authenticate) {
 
-    accountService.registerPublisher(
-        Account.builder()
-            .userId("1")
-            .role(Account.Role.Publisher)
-            .userName("name")
-            .build(),
-        "password");
+    boolean authenticationOk = accountService.isUserNamePasswordValid(
+        authenticate.getUserName(), authenticate.getPassword());
 
-    String html = "<h2>All stuff</h2><ul>";
-    html += "</ul>";
-    return html;
+    if (authenticationOk) {
+      String token = UUID.randomUUID().toString();
+      AuthenticationToken authenticationToken =
+          AuthenticationToken.builder().token(token).build();
+      return Response.ok(authenticationToken).build();
+    } else {
+      return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
   }
 }

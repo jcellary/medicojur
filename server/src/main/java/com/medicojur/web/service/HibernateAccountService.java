@@ -2,13 +2,11 @@ package com.medicojur.web.service;
 
 import javax.inject.Inject;
 
-import com.medicojur.web.model.hibernate.Contact;
 import com.medicojur.web.model.service.Account;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-
-import java.util.List;
 
 public class HibernateAccountService implements AccountService {
 
@@ -20,44 +18,41 @@ public class HibernateAccountService implements AccountService {
   }
 
   public void registerPublisher(Account account, String password) {
-    testHibernate();
-  }
-
-  public void testHibernate() {
     Session session = null;
-    Transaction tx = null;
 
     try {
       session = sessionFactory.openSession();
-      tx = session.beginTransaction();
 
-      // Creating Contact entity that will be save to the sqlite database
-      Contact myContact = new Contact(3, "My Name", "my_email@email.com");
-      Contact yourContact = new Contact(24, "Your Name", "your_email@email.com");
+      com.medicojur.web.model.hibernate.Account dbAccount =
+          com.medicojur.web.model.hibernate.Account.builder()
+              .firstName(account.getFirstName())
+              .lastName(account.getLastName())
+              .userName(account.getUserName())
+              .role(com.medicojur.web.model.hibernate.Account.PUBLISHER)
+              .password(DigestUtils.md5Hex(password))
+              .build();
 
-      // Saving to the database
-      session.save(myContact);
-      session.save(yourContact);
-
-      // Committing the change in the database.
+      session.save(dbAccount);
       session.flush();
-      tx.commit();
-
-      // Fetching saved data
-      List<Contact> contactList = session.createQuery("from Contact").list();
-
-      for (Contact contact : contactList) {
-        System.out.println(
-            "Id: " + contact.getId() + " | Name:" + contact.getName() + " | Email:" + contact
-                .getEmail());
+    } finally {
+      if (session != null) {
+        session.close();
       }
+    }
+  }
 
-    } catch (Exception ex) {
-      ex.printStackTrace();
+  public boolean isUserNamePasswordValid(String userName, String password) {
+    Session session = null;
 
-      // Rolling back the changes to make the data consistent in case of any failure
-      // in between multiple database write operations.
-      tx.rollback();
+    try {
+      session = sessionFactory.openSession();
+
+      Query query = session.createQuery(
+          "from Account where userName = :userName and password = :password");
+      query.setParameter("userName", userName);
+      query.setParameter("password", DigestUtils.md5Hex(password));
+
+      return query.list().size() > 0;
     } finally {
       if (session != null) {
         session.close();

@@ -1,17 +1,23 @@
 package com.medicojur.web.server;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.servlet.ServletModule;
 import com.medicojur.web.MainContextListener;
+import com.medicojur.web.model.server.Authenticate;
+import com.medicojur.web.model.server.AuthenticationToken;
 import com.medicojur.web.model.server.RegisterPublisher;
 import com.medicojur.web.model.service.Account;
 import com.medicojur.web.service.AccountService;
@@ -81,7 +87,7 @@ public class PublisherAccountResourceTest {
         .password("testPassword")
         .build();
 
-    ClientResponse resp = service.path("services").path("publisherAccount")
+    ClientResponse resp = service.path("services/publisherAccount/register")
         .accept(MediaType.APPLICATION_JSON)
         .entity(registerPublisher, MediaType.APPLICATION_JSON)
         .post(ClientResponse.class);
@@ -94,5 +100,27 @@ public class PublisherAccountResourceTest {
     assertThat(accountCaptor.getValue().getLastName(), is(equalTo("testLastName")));
     assertThat(accountCaptor.getValue().getUserName(), is(equalTo("testUserName")));
     assertThat(accountCaptor.getValue().getRole(), is(equalTo(Account.Role.Publisher)));
+  }
+
+  @Test
+  public void shouldGenerateTokenWhenAuthenticationOk() throws IOException {
+    WebResource service = Utils.createWebResource(getBaseURI());
+
+    when(accountService.isUserNamePasswordValid(anyString(), anyString())).thenReturn(true);
+
+    Authenticate registerPublisher = Authenticate.builder()
+        .userName("testUserName")
+        .password("testPassword")
+        .build();
+
+    AuthenticationToken resp = service.path("services/publisherAccount/authenticate")
+        .accept(MediaType.APPLICATION_JSON)
+        .entity(registerPublisher, MediaType.APPLICATION_JSON)
+        .post(AuthenticationToken.class);
+
+    assertThat(resp.getToken(), is(notNullValue()));
+    assertThat(resp.getToken().length(), is(greaterThan(0)));
+
+    verify(accountService).isUserNamePasswordValid(eq("testUserName"), eq("testPassword"));
   }
 }

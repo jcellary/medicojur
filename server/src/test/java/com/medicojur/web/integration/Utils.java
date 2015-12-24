@@ -2,7 +2,8 @@ package com.medicojur.web.integration;
 
 import com.google.inject.servlet.GuiceFilter;
 import com.medicojur.web.MainContextListener;
-import com.medicojur.web.model.hibernate.Contact;
+import com.medicojur.web.model.hibernate.Account;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -10,7 +11,6 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.service.ServiceRegistry;
@@ -25,14 +25,24 @@ public class Utils {
     return new MetadataSources(serviceRegistry).buildMetadata().buildSessionFactory();
   }
 
-  public static void clearDb(SessionFactory sessionFactory) {
-    Session session = sessionFactory.openSession();
-    Transaction tx = session.beginTransaction();
-
-    Query q = session.createQuery("delete from Contact");
+  public static void clearDb(Session session) {
+    Query q = session.createQuery("delete from Account");
     q.executeUpdate();
+  }
 
-    tx.commit();
+  public static Account createTestAccountEntity() {
+    return Account.builder()
+        .firstName("testFirstName")
+        .lastName("testLastName")
+        .userName("testUserName")
+        .role(com.medicojur.web.model.hibernate.Account.PUBLISHER)
+        .password(DigestUtils.md5Hex("testPassword"))
+        .build();
+  }
+
+  public static void createTestPublisher(Session session) {
+    session.save(createTestAccountEntity());
+    session.flush();
   }
 
   public static Server createJettyServer(int port) throws Exception {
@@ -50,5 +60,4 @@ public class Utils {
 
     return server;
   }
-
 }
