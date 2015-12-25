@@ -16,6 +16,7 @@
         return service;
 
         function GetAll() {
+            //TODO use backend instead of dummy data
             var journals = [{id:'1', filename:'file1', tags:'tag1, tag2'}, 
                     {id:'2', filename:'file2', tags:'tag3, tag4'}];
             
@@ -35,7 +36,8 @@
         }
         
         function Delete(id) {
-            return $http.delete('/api/users/' + id).then(handleSuccess, handleError('Error deleting journal'));
+            //TODO implement
+            //return $http.delete('/api/users/' + id).then(handleSuccess, handleError('Error deleting journal'));
         }
 
         // private functions

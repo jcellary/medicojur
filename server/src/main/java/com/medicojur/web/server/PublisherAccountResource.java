@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -35,7 +36,7 @@ public class PublisherAccountResource {
 
   @POST
   @Path("register")
-  public void register(RegisterPublisher registerPublisher) {
+  public Response register(RegisterPublisher registerPublisher) {
 
     accountService.registerPublisher(
         Account.builder()
@@ -46,6 +47,8 @@ public class PublisherAccountResource {
             .lastName(registerPublisher.getLastName())
             .build(),
         registerPublisher.getPassword());
+
+    return CorsUtils.addCorsHeaders(Response.ok()).build();
   }
 
   @POST
@@ -59,9 +62,23 @@ public class PublisherAccountResource {
       String token = tokenService.generateToken(userId.get());
       AuthenticationToken authenticationToken =
           AuthenticationToken.builder().token(token).build();
-      return Response.ok(authenticationToken).build();
+      return CorsUtils.addCorsHeaders(Response.ok(authenticationToken)).build();
     } else {
-      return Response.status(Response.Status.UNAUTHORIZED).build();
+      return CorsUtils.addCorsHeaders(Response.status(Response.Status.UNAUTHORIZED)).build();
     }
+  }
+
+  @OPTIONS
+  @Path("register")
+  public Response registerOptions() {
+    //TODO refactor to provide a global options function
+    return CorsUtils.addCorsHeaders(Response.ok()).build();
+  }
+
+  @OPTIONS
+  @Path("authenticate")
+  public Response authenticateOptions() {
+    //TODO refactor to provide a global options function
+    return CorsUtils.addCorsHeaders(Response.ok()).build();
   }
 }

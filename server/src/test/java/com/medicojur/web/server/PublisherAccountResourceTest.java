@@ -98,7 +98,7 @@ public class PublisherAccountResourceTest {
         .entity(registerPublisher, MediaType.APPLICATION_JSON)
         .post(ClientResponse.class);
 
-    assertThat(resp.getStatus(), is(equalTo(Response.Status.NO_CONTENT.getStatusCode())));
+    assertThat(resp.getStatus(), is(equalTo(Response.Status.OK.getStatusCode())));
 
     ArgumentCaptor<Account> accountCaptor = ArgumentCaptor.forClass(Account.class);
     verify(accountService).registerPublisher(accountCaptor.capture(), eq("testPassword"));

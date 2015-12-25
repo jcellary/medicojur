@@ -39,6 +39,10 @@ public class MainContextListener extends GuiceServletContextListener {
     configureSessionFactory();
 
     final ResourceConfig rc = new PackagesResourceConfig(RESOURCE_PACKAGE_NAMESPACE);
+    rc.getProperties().put(
+        "com.sun.jersey.spi.container.ContainerResponseFilters",
+        "com.sun.jersey.api.container.filter.LoggingFilter;com.medicojur.web.filters.CORSFilter"
+    );
 
     return Guice.createInjector(new ServletModule() {
       @Override
@@ -46,7 +50,8 @@ public class MainContextListener extends GuiceServletContextListener {
 
         //Bind services
         bind(new TypeLiteral<AccountService>() {}).to(HibernateAccountService.class);
-        bind(new TypeLiteral<TokenService>() {}).to(HibernateTokenService.class);
+        bind(new TypeLiteral<TokenService>() {
+        }).to(HibernateTokenService.class);
 
         //Bind single hibernate session factory object, it's thread safe.
         bind(new TypeLiteral<SessionFactory>() {}).toInstance(sessionFactory);
