@@ -22,22 +22,11 @@
 
         function initController() {
             loadCurrentUser();
-            loadAllUsers();
             loadJournals();
         }
 
         function loadCurrentUser() {
-            UserService.GetByUsername($rootScope.globals.currentUser.username)
-                .then(function (user) {
-                    vm.user = user;
-                });
-        }
-
-        function loadAllUsers() {
-            UserService.GetAll()
-                .then(function (users) {
-                    vm.allUsers = users;
-                });
+            vm.user = {userName:$rootScope.globals.currentUser.username}
         }
 
         function deleteUser(id) {

@@ -1,12 +1,5 @@
-﻿<h1>Hi {{vm.user.firstName}}!</h1>
+﻿<h1>Hi {{vm.user.userName}}!</h1>
 <p>You're logged in!!</p>
-<h3>All registered users:</h3>
-<ul>
-    <li ng-repeat="user in vm.allUsers">
-        {{user.username}} ({{user.firstName}} {{user.lastName}})
-        - <a href="#" ng-click="vm.deleteUser(user.id)">Delete</a>
-    </li>
-</ul>
 <h3>Published journals:</h3>
 <ul>
     <li ng-repeat="journal in vm.journals">
