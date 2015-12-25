@@ -7,6 +7,8 @@ import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.medicojur.web.service.AccountService;
 import com.medicojur.web.service.HibernateAccountService;
+import com.medicojur.web.service.HibernateTokenService;
+import com.medicojur.web.service.TokenService;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -44,6 +46,7 @@ public class MainContextListener extends GuiceServletContextListener {
 
         //Bind services
         bind(new TypeLiteral<AccountService>() {}).to(HibernateAccountService.class);
+        bind(new TypeLiteral<TokenService>() {}).to(HibernateTokenService.class);
 
         //Bind single hibernate session factory object, it's thread safe.
         bind(new TypeLiteral<SessionFactory>() {}).toInstance(sessionFactory);

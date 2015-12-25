@@ -5,7 +5,9 @@ import com.medicojur.web.model.server.AuthenticationToken;
 import com.medicojur.web.model.server.RegisterPublisher;
 import com.medicojur.web.model.service.Account;
 import com.medicojur.web.service.AccountService;
+import com.medicojur.web.service.TokenService;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -23,9 +25,12 @@ public class PublisherAccountResource {
 
   private AccountService accountService;
 
+  private TokenService tokenService;
+
   @Inject
-  public PublisherAccountResource(AccountService accountService) {
+  public PublisherAccountResource(AccountService accountService, TokenService tokenService) {
     this.accountService = accountService;
+    this.tokenService = tokenService;
   }
 
   @POST
@@ -47,11 +52,11 @@ public class PublisherAccountResource {
   @Path("authenticate")
   public Response authenticate(Authenticate authenticate) {
 
-    boolean authenticationOk = accountService.isUserNamePasswordValid(
+    Optional<Integer> userId = accountService.getUserIdWithUserNameAndPassword(
         authenticate.getUserName(), authenticate.getPassword());
 
-    if (authenticationOk) {
-      String token = UUID.randomUUID().toString();
+    if (userId.isPresent()) {
+      String token = tokenService.generateToken(userId.get());
       AuthenticationToken authenticationToken =
           AuthenticationToken.builder().token(token).build();
       return Response.ok(authenticationToken).build();

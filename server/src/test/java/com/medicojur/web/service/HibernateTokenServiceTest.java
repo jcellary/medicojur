@@ -51,4 +51,29 @@ public class HibernateTokenServiceTest {
     assertThat(tokenCaptor.getValue().getToken(), is(equalTo(token)));
     assertThat(tokenCaptor.getValue().getUserId(), is(equalTo(1)));
   }
+
+  @Test
+  public void shouldVerifyTokenWhenValid() {
+    String testToken = "123";
+    when(session.get(Token.class, testToken)).thenReturn(
+        Token.builder().token(testToken).userId(1).build());
+
+    boolean isTokenValid = hts.isTokenValid(testToken);
+
+    assertThat(isTokenValid, is(equalTo(true)));
+    verify(session).get(Token.class, testToken);
+    verify(session).close();
+  }
+
+  @Test
+  public void shouldVerifyTokenWhenInvalid() {
+    String testToken = "123";
+    when(session.get(Token.class, testToken)).thenReturn(null);
+
+    boolean isTokenValid = hts.isTokenValid(testToken);
+
+    assertThat(isTokenValid, is(equalTo(false)));
+    verify(session).get(Token.class, testToken);
+    verify(session).close();
+  }
 }

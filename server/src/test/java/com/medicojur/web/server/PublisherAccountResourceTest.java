@@ -21,6 +21,7 @@ import com.medicojur.web.model.server.AuthenticationToken;
 import com.medicojur.web.model.server.RegisterPublisher;
 import com.medicojur.web.model.service.Account;
 import com.medicojur.web.service.AccountService;
+import com.medicojur.web.service.TokenService;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
@@ -36,6 +37,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -51,6 +53,8 @@ public class PublisherAccountResourceTest {
 
   private AccountService accountService = mock(AccountService.class);
 
+  private TokenService tokenService = mock(TokenService.class);
+
   private static URI getBaseURI() {
     return UriBuilder.fromUri("http://localhost/").port(PORT).build();
   }
@@ -62,6 +66,8 @@ public class PublisherAccountResourceTest {
       protected void configureServlets() {
         bind(new TypeLiteral<AccountService>() {
         }).toInstance(accountService);
+        bind(new TypeLiteral<TokenService>() {
+        }).toInstance(tokenService);
       }
     });
 
@@ -106,7 +112,9 @@ public class PublisherAccountResourceTest {
   public void shouldGenerateTokenWhenAuthenticationOk() throws IOException {
     WebResource service = Utils.createWebResource(getBaseURI());
 
-    when(accountService.isUserNamePasswordValid(anyString(), anyString())).thenReturn(true);
+    when(accountService.getUserIdWithUserNameAndPassword(anyString(), anyString())).thenReturn(
+        Optional.of(1));
+    when(tokenService.generateToken(eq(1))).thenReturn("123");
 
     Authenticate registerPublisher = Authenticate.builder()
         .userName("testUserName")
@@ -121,6 +129,6 @@ public class PublisherAccountResourceTest {
     assertThat(resp.getToken(), is(notNullValue()));
     assertThat(resp.getToken().length(), is(greaterThan(0)));
 
-    verify(accountService).isUserNamePasswordValid(eq("testUserName"), eq("testPassword"));
+    verify(accountService).getUserIdWithUserNameAndPassword(eq("testUserName"), eq("testPassword"));
   }
 }

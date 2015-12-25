@@ -9,3 +9,9 @@ CREATE TABLE Account
   first_name VARCHAR NOT NULL,
   last_name VARCHAR NOT NULL
 );
+
+CREATE TABLE Token
+(
+  token VARCHAR PRIMARY KEY,
+  user_id INTEGER NOT NULL
+);

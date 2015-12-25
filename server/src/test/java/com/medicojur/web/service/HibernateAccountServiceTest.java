@@ -3,6 +3,7 @@ package com.medicojur.web.service;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class HibernateAccountServiceTest {
 
@@ -54,13 +56,14 @@ public class HibernateAccountServiceTest {
   }
 
   @Test
-  public void shouldAuthenticateIfUserNameAndPasswordValid() {
+  public void shouldGetUserIdIfUserNameAndPasswordValid() {
     Query query = mock(Query.class);
     when(session.createQuery(anyString())).thenReturn(query);
     when(query.list()).thenReturn(Arrays.asList(
-        new com.medicojur.web.model.hibernate.Account()));
+        com.medicojur.web.model.hibernate.Account.builder().id(1).build()));
 
-    assertThat(has.isUserNamePasswordValid("testUserName", "testPassword"), is(true));
+    assertThat(has.getUserIdWithUserNameAndPassword("testUserName", "testPassword"), is(equalTo(
+        Optional.of(1))));
 
     verify(session).createQuery(
         "from Account where userName = :userName and password = :password");
@@ -70,12 +73,13 @@ public class HibernateAccountServiceTest {
   }
 
   @Test
-  public void shouldFailAuthenticationIfUserNameAndPasswordNotValid() {
+  public void shouldReturnEmptyIfUserNameAndPasswordNotValid() {
     Query query = mock(Query.class);
     when(session.createQuery(anyString())).thenReturn(query);
     when(query.list()).thenReturn(new ArrayList());
 
-    assertThat(has.isUserNamePasswordValid("testUserName", "testPassword"), is(false));
+    assertEquals(Optional.empty(),
+                 has.getUserIdWithUserNameAndPassword("testUserName", "testPassword"));
 
     verify(session).createQuery(
         "from Account where userName = :userName and password = :password");

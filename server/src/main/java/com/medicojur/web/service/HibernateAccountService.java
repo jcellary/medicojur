@@ -8,6 +8,9 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import java.util.List;
+import java.util.Optional;
+
 public class HibernateAccountService implements AccountService {
 
   private SessionFactory sessionFactory;
@@ -41,7 +44,7 @@ public class HibernateAccountService implements AccountService {
     }
   }
 
-  public boolean isUserNamePasswordValid(String userName, String password) {
+  public Optional<Integer> getUserIdWithUserNameAndPassword(String userName, String password) {
     Session session = null;
 
     try {
@@ -51,8 +54,13 @@ public class HibernateAccountService implements AccountService {
           "from Account where userName = :userName and password = :password");
       query.setParameter("userName", userName);
       query.setParameter("password", DigestUtils.md5Hex(password));
+      List<com.medicojur.web.model.hibernate.Account> list = query.list();
 
-      return query.list().size() > 0;
+      if (list.size() == 0) {
+        return Optional.empty();
+      } else {
+        return Optional.of(list.get(0).getId());
+      }
     } finally {
       if (session != null) {
         session.close();

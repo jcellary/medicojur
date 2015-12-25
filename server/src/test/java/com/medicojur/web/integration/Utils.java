@@ -28,6 +28,8 @@ public class Utils {
   public static void clearDb(Session session) {
     Query q = session.createQuery("delete from Account");
     q.executeUpdate();
+    q = session.createQuery("delete from Token");
+    q.executeUpdate();
   }
 
   public static Account createTestAccountEntity() {
